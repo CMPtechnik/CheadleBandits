@@ -28,7 +28,7 @@
     <img src="logo.png" alt="League Logo">
   </div>
   <h1>Cheadle Bandits League Table</h1>
-  <h3>Last Update - Wed 9 April 10:48</h3>
+  <h4>Last Update - Wed 9 April 10:48</h4>
   <input type="file" id="upload" accept=".xlsx, .xls" />
 
   <div class="button-container">
@@ -51,7 +51,7 @@
   <script>
     // Function to fetch the spreadsheet from GitHub
     function handleGitHubFile() {
-      const fileUrl = "https://github.com/CMPtechnik/CheadleBandits/blob/main/data/leaguedata.xlsx";
+      const fileUrl = "https://github.com/CMPtechnik/CheadleBandits/main/data/leaguedata.xlsx";
 
       fetch(fileUrl)
         .then(response => response.arrayBuffer())
