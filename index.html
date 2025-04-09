@@ -48,28 +48,27 @@
   </div>
 
   <script>
-    const storedHistory = JSON.parse(localStorage.getItem('history')) || [];
-    let history = [...storedHistory];
+    // Function to fetch the spreadsheet from GitHub
+    function handleGitHubFile() {
+      const fileUrl = "https://raw.githubusercontent.com/cmptechnik/cheadlebandits/main/data/sample_league_data.xlsx";
 
-    document.getElementById('upload').addEventListener('change', handleFile);
-
-    function handleFile(e) {
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(sheet);
-        updateLeague(json);
-      };
-      reader.readAsArrayBuffer(e.target.files[0]);
+      fetch(fileUrl)
+        .then(response => response.arrayBuffer())
+        .then(data => {
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(sheet);
+          updateLeague(json);
+        })
+        .catch(error => {
+          console.error('Error loading the spreadsheet: ', error);
+        });
     }
 
+    // Update the league table based on the fetched data
     function updateLeague(newData) {
-      history.push(...newData);
-      localStorage.setItem('history', JSON.stringify(history));
-
+      const history = [...newData];
       const scores = {};
       const wins = {};
       const rounds = {};
@@ -99,10 +98,11 @@
         return { name, avg: avg.toFixed(2), games, winPct };
       }).sort((a, b) => a.avg - b.avg);
 
-      renderTable(league, scores);
+      renderTable(league);
     }
 
-    function renderTable(data, scoresObj) {
+    // Render the league table
+    function renderTable(data) {
       const table = document.getElementById('league-table');
       table.innerHTML = '<tr><th>Rank</th><th>Name</th><th>Avg Score</th><th>Games</th><th>Win %</th></tr>';
       data.forEach((player, i) => {
@@ -116,9 +116,10 @@
       });
     }
 
+    // Function to show the player's score history in a modal
     function showPlayerModal(name) {
       const scores = history.filter(entry => entry.Name === name).map(e => ({ round: e.Round, score: parseFloat(e.Score) }));
-      const sortedScores = scores.sort((a, b) => a.round.localeCompare(b.round));
+      const sortedScores = scores.sort((a, b) => a.round - b.round);
       document.getElementById('modalTitle').innerText = `${name}'s Score History`;
 
       const scoreList = document.getElementById('scoreList');
@@ -146,10 +147,17 @@
       document.getElementById('scoreModal').style.display = 'flex';
     }
 
+    // Function to close the modal
     function closeModal() {
       document.getElementById('scoreModal').style.display = 'none';
     }
 
+    // Call the handleGitHubFile function when the page loads
+    window.onload = () => {
+      handleGitHubFile();
+    };
+
+    // Reset data function
     function promptReset() {
       const password = prompt("Enter admin password to reset data:");
       if (password === "admin123") {
@@ -164,8 +172,6 @@
       history = [];
       renderTable([]);
     }
-
-    if (storedHistory.length > 0) updateLeague([]);
   </script>
 </body>
 </html>
