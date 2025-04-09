@@ -119,51 +119,52 @@
 
     // Show player modal with score history
     function showPlayerModal(name) {
-    const scores = history.filter(entry => entry.Name === name)
-      .map(e => ({ round: e.Round, gross: parseFloat(e.Gross), net: parseFloat(e.Net) }))
-      .sort((a, b) => ('' + a.round).localeCompare(b.round));
+      const scores = history.filter(entry => entry.Name === name)
+        .map(e => ({ round: e.Round, gross: parseFloat(e.Gross), net: parseFloat(e.Net) }))
+        .sort((a, b) => ('' + a.round).localeCompare(b.round));
 
-    document.getElementById('modalTitle').innerText = `${name}'s Score History`;
+      document.getElementById('modalTitle').innerText = `${name}'s Score History`;
 
-    const scoreList = document.getElementById('scoreList');
-    scoreList.innerHTML = '';
-    scores.forEach(s => {
-      scoreList.innerHTML += `<li>Round ${s.round}: Gross ${s.gross}, Net ${s.net}</li>`;
-    });
+      const scoreList = document.getElementById('scoreList');
+      scoreList.innerHTML = '';
+      scores.forEach(s => {
+        scoreList.innerHTML += `<li>Round ${s.round}: Gross ${s.gross}, Net ${s.net}</li>`;
+      });
 
-    const ctx = document.getElementById('scoreChart').getContext('2d');
+      const ctx = document.getElementById('scoreChart').getContext('2d');
 
-    // Check if the chart exists and destroy it before creating a new one
-    if (window.scoreChart) {
-      window.scoreChart.destroy(); // Only destroy if chart exists
+      // Destroy the previous chart if it exists
+      if (window.scoreChart instanceof Chart) {
+        window.scoreChart.destroy(); // Only destroy if it's a valid chart instance
+      }
+
+      // Create a new chart
+      window.scoreChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: scores.map(s => s.round),
+          datasets: [
+            {
+              label: 'Gross',
+              data: scores.map(s => s.gross),
+              fill: false,
+              borderColor: 'red',
+              tension: 0.1
+            },
+            {
+              label: 'Net',
+              data: scores.map(s => s.net),
+              fill: false,
+              borderColor: 'blue',
+              tension: 0.1
+            }
+          ]
+        }
+      });
+
+      document.getElementById('scoreModal').style.display = 'flex';
     }
 
-    // Create the new chart
-    window.scoreChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: scores.map(s => s.round),
-        datasets: [
-          {
-            label: 'Gross',
-            data: scores.map(s => s.gross),
-            fill: false,
-            borderColor: 'red',
-            tension: 0.1
-          },
-          {
-            label: 'Net',
-            data: scores.map(s => s.net),
-            fill: false,
-            borderColor: 'blue',
-            tension: 0.1
-          }
-        ]
-      }
-    });
-
-    document.getElementById('scoreModal').style.display = 'flex';
-  }
 
 
     // Close the player modal
