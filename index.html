@@ -22,10 +22,11 @@
 </head>
 <body>
   <div class="logo-container">
-    <img src="logo.png" alt="Cheadle Bandits League Logo">
+    <img src="logo.png" alt="League Logo">
   </div>
   <h1>Cheadle Bandits League Table</h1>
-<h4> Last Update April 9th - 11:50</h4>
+  <h4>Last Update - Wed 9 April 11:18</h4>
+
   <table id="league-table">
     <tr><th>Rank</th><th>Name</th><th>Avg Gross</th><th>Avg Net</th><th>Games</th><th>Net Win %</th></tr>
   </table>
@@ -40,6 +41,8 @@
   </div>
 
   <script>
+    let history = [];
+
     // Fetch data from GitHub
     fetch("https://raw.githubusercontent.com/cmptechnik/CheadleBandits/main/data/leaguedata.xlsx")
       .then(res => res.arrayBuffer())
@@ -47,7 +50,8 @@
         const workbook = XLSX.read(buffer, { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet);
-        updateLeague(json);
+        history = json;  // Store the data in the 'history' variable
+        updateLeague(history);  // Use 'history' to update the league table
       });
 
     // Update the league table
