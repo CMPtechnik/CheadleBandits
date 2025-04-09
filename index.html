@@ -6,8 +6,6 @@
   <title>League Table</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
- <style>
   <style>
     body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; }
     h1 { text-align: center; }
@@ -27,9 +25,6 @@
   </div>
   <h1>Cheadle Bandits League Table</h1>
   <h4>Last Update - Wed 9 April 12:18</h4>
-  <div class="button-container">
-    <button onclick="downloadPDF()">Download PDF</button>
-  </div>
 
   <table id="league-table">
     <tr><th>Rank</th><th>Name</th><th>Avg Gross</th><th>Avg Net</th><th>Games</th><th>Net Win %</th></tr>
@@ -176,26 +171,6 @@
     function closeModal() {
       document.getElementById('scoreModal').style.display = 'none';
     }
-    function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const table = document.getElementById('league-table');
-  const tableClone = table.cloneNode(true); // Clone the table to avoid modifying the original table
-
-  // Remove any links or interactive elements in the cloned table (like player names)
-  const links = tableClone.querySelectorAll('a');
-  links.forEach(link => link.removeAttribute('href'));
-
-  doc.html(tableClone, {
-    callback: function (doc) {
-      doc.save('league-table.pdf');
-    },
-    margin: [20, 20, 20, 20],
-    autoPaging: true,
-  });
-}
-
   </script>
 </body>
 </html>
