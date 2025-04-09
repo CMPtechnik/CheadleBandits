@@ -159,20 +159,20 @@
     };
 
     // Reset data function
-    function promptReset() {
-      const password = prompt("Enter admin password to reset data:");
-      if (password === "admin123") {
-        resetHistory();
-      } else {
-        alert("Incorrect password. Reset cancelled.");
-      }
-    }
+  //  function promptReset() {
+    //  const password = prompt("Enter admin password to reset data:");
+      //if (password === "admin123") {
+        //resetHistory();
+    //  } else {
+      //  alert("Incorrect password. Reset cancelled.");
+    //  }
+  //  }
 
-    function resetHistory() {
-      localStorage.removeItem('history');
-      history = [];
-      renderTable([]);
-    }
+  //  function resetHistory() {
+    //  localStorage.removeItem('history');
+      //history = [];
+    //  renderTable([]);
+  //  }
   </script>
 </body>
 </html>
