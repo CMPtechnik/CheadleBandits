@@ -25,7 +25,7 @@
 </head>
 <body>
   <div class="logo-container">
-    <img src="logo.png" alt="League Logo">
+    <img src="logo.png" alt="Cheadle Bandits League Logo">
   </div>
   <h1>Cheadle Bandits League Table</h1>
   <input type="file" id="upload" accept=".xlsx, .xls" />
@@ -50,7 +50,7 @@
   <script>
     // Function to fetch the spreadsheet from GitHub
     function handleGitHubFile() {
-      const fileUrl = "https://raw.githubusercontent.com/cmptechnik/cheadlebandits/main/data/sample_league_data.xlsx";
+      const fileUrl = "https://github.com/CMPtechnik/CheadleBandits/blob/main/data/leaguedata.xlsx";
 
       fetch(fileUrl)
         .then(response => response.arrayBuffer())
