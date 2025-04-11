@@ -122,7 +122,7 @@
     // Show player modal with score history
     function showPlayerModal(name) {
       const scores = history.filter(entry => entry.Name === name)
-        .map(e => ({ round: e.Round, gross: parseFloat(e.Gross), net: parseFloat(e.Net) }))
+        .map(e => ({ round: e.Round, gross: parseFloat(e.Gross), net: parseFloat(e.Net), competition: parseFloat(e.Competition) })))
         .sort((a, b) => ('' + a.round).localeCompare(b.round));
 
       document.getElementById('modalTitle').innerText = `${name}'s Score History`;
@@ -130,7 +130,7 @@
       const scoreList = document.getElementById('scoreList');
       scoreList.innerHTML = '';
       scores.forEach(s => {
-        scoreList.innerHTML += `<li>Round ${s.round}: Gross ${s.gross}, Net ${s.net}</li>`;
+        scoreList.innerHTML += `<li>Round ${s.round}: Gross ${s.gross}, Net ${s.net}, Competition ${s.Competition} </li>`;
       });
 
       const ctx = document.getElementById('scoreChart').getContext('2d');
