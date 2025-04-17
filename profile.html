@@ -6,29 +6,130 @@
   <title>Player Profile</title>
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="apple-touch-icon" href="favicon.png" sizes="180x180" />
-  <meta name="theme-color" content="#005c41" />
+  <meta name="theme-color" content="#ffffff" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <!-- Chart.js & XLSX -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    :root { --primary: #15171f; --accent: #e6f2ef; --text: #1e1e1e; --bg: #fdfdfd; --border: #ccc; }
-    body { margin:0; font-family:'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
-    header { background:var(--primary); color:#fff; padding:1rem; text-align:center; }
-    header nav a { color:#fff; text-decoration:none; margin:0 0.5rem; font-size:0.9rem; }
-    #profileHeader { max-width:800px; margin:2rem auto; text-align:center; }
-    #profileHeader .avatar { width:100px; height:100px; border-radius:50%; object-fit:cover; }
-    #profileHeader h1 { margin:0.5rem 0; }
-    #profileHeader ul { list-style:none; padding:0; margin:0.5rem 0; display:flex; justify-content:center; gap:1rem; }
-    #charts { max-width:800px; margin:2rem auto; display:grid; gap:2rem; }
-    canvas { width:100% !important; height:300px !important; }
-    #historySection { max-width:800px; margin:2rem auto; }
-    #historyTable { width:100%; border-collapse:collapse; }
-    #historyTable th, #historyTable td { border:1px solid var(--border); padding:8px; text-align:center; }
-    #historyTable th { background:var(--accent); }
-    .no-data { text-align:center; margin:2rem auto; font-size:1.2rem; color:#666; }
-    @media screen and (max-width:768px) {
-      #charts { display:block; }
-      #charts canvas { height:200px !important; }
+    :root {
+      --primary: #f4f4f4;
+      --accent: #009688;
+      --text: #333;
+      --bg: #ffffff;
+      --border: #ddd;
+      --highlight: #4caf50;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      background: var(--accent);
+      color: var(--bg);
+      padding: 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    header nav a {
+      color: var(--bg);
+      text-decoration: none;
+      margin: 0 0.5rem;
+      font-size: 1rem;
+    }
+    #profileHeader {
+      max-width: 800px;
+      margin: 2rem auto;
+      text-align: center;
+      background: var(--primary);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    #profileHeader .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid var(--highlight);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    #profileHeader h1 {
+      margin: 1rem 0;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+    #profileHeader ul {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+    }
+    #profileHeader ul li {
+      font-weight: 600;
+      color: var(--highlight);
+    }
+    #charts {
+      max-width: 1000px;
+      margin: 2rem auto;
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: 1fr 1fr;
+      padding: 1rem;
+    }
+    .chart-container {
+      background: var(--primary);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    canvas {
+      width: 100% !important;
+      height: 300px !important;
+    }
+    #historySection {
+      max-width: 1000px;
+      margin: 2rem auto;
+      background: var(--primary);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    #historyTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    #historyTable th, #historyTable td {
+      border: 1px solid var(--border);
+      padding: 12px;
+      text-align: center;
+      font-weight: 500;
+    }
+    #historyTable th {
+      background: var(--highlight);
+      color: var(--bg);
+    }
+    .no-data {
+      text-align: center;
+      margin: 2rem auto;
+      font-size: 1.2rem;
+      color: var(--highlight);
+    }
+    @media screen and (max-width: 768px) {
+      #charts {
+        grid-template-columns: 1fr;
+      }
+      #profileHeader ul {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -44,9 +145,15 @@
   <div id="profileHeader"></div>
 
   <div id="charts" style="display:none;">
-    <canvas id="chartScore"></canvas>
-    <canvas id="chartPosition"></canvas>
-    <canvas id="chartSF"></canvas>
+    <div class="chart-container">
+      <canvas id="chartScore"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartPosition"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartSF"></canvas>
+    </div>
   </div>
 
   <section id="historySection" style="display:none;">
@@ -80,7 +187,6 @@
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const history = XLSX.utils.sheet_to_json(sheet);
 
-        // Filter records for player (case-insensitive)
         const recs = history.filter(r => r.Name && r.Name.toLowerCase() === playerName.toLowerCase());
 
         if (!recs.length) {
@@ -111,52 +217,65 @@
           </ul>
         `;
 
-        // Prepare chart data
         const competitions = recs.map(r => r.Title || r.Competition);
         const dates = recs.map(r => parseDateStr(r.Date).toLocaleDateString());
         const scores = recs.map(r => parseFloat(r.Score) || 0);
         const positions = recs.map(r => parseInt(r.Position) || 0);
         const sfs = recs.map(r => parseInt(r['Stableford Points']) || 0);
 
-        // Filter out Stableford and non-Stableford scores for separate charts
-        const netScores = scores.filter((score, index) => sfs[index] === 0);
-        const stablefordScores = sfs.filter(sf => sf > 0);
-        const stablefordCompetitions = competitions.filter((competition, index) => sfs[index] > 0); // Only include Stableford competitions in this chart
+        // Filter out Stableford competitions for Net Score chart (Stroke Play only)
+        const netScores = scores.filter((score, index) => sfs[index] === 0);  // Exclude Stableford competitions
+        const stablefordScores = sfs.filter(sf => sf > 0);  // Only include Stableford points
+        const stablefordCompetitions = competitions.filter((competition, index) => sfs[index] > 0);  // Only Stableford competitions
 
-        // Net Score Chart with Par 64 baseline
+        // Net Score Chart (only Stroke Play)
         const ctxScore = document.getElementById('chartScore').getContext('2d');
         new Chart(ctxScore, {
           type: 'line',
           data: {
-            labels: competitions,  // Use competition name as labels
+            labels: competitions,
             datasets: [
-              { label: 'Net Score', data: netScores, fill: false },
-              { label: 'Par 64', data: new Array(competitions.length).fill(64), borderDash: [5,5], fill: false }
+              { label: 'Net Score', data: netScores, fill: false, borderColor: '#4caf50', borderWidth: 3, tension: 0.2 },
+              { label: 'Par 64', data: new Array(competitions.length).fill(64), borderDash: [5,5], fill: false, borderColor: '#ff7043', borderWidth: 2 }
             ]
           },
-          options: { responsive: true }
+          options: {
+            responsive: true,
+            animation: { duration: 1000 },
+            scales: { x: { grid: { display: false } }, y: { min: 50, max: 100 } }
+          }
         });
 
         // Position Chart
         const ctxPos = document.getElementById('chartPosition').getContext('2d');
         new Chart(ctxPos, {
           type: 'line',
-          data: { labels: competitions, datasets: [{ label: 'Position', data: positions, fill: false }] },
-          options: { responsive: true, scales: { y: { reverse: true } } }
+          data: {
+            labels: competitions,
+            datasets: [{ label: 'Position', data: positions, fill: false, borderColor: '#0288d1', borderWidth: 3 }]
+          },
+          options: {
+            responsive: true,
+            animation: { duration: 1000 },
+            scales: { y: { reverse: true } }
+          }
         });
 
-        // Stableford Chart - Only show Stableford results
+        // Stableford Chart (only Stableford competitions)
         const ctxSF = document.getElementById('chartSF').getContext('2d');
         new Chart(ctxSF, {
           type: 'bar',
           data: {
-            labels: stablefordCompetitions,  // Only show competitions with Stableford results
-            datasets: [{ label: 'Stableford Points', data: stablefordScores }]
+            labels: stablefordCompetitions,
+            datasets: [{ label: 'Stableford Points', data: stablefordScores, backgroundColor: '#81c784' }]
           },
-          options: { responsive: true }
+          options: {
+            responsive: true,
+            animation: { duration: 1000 },
+            scales: { y: { beginAtZero: true } }
+          }
         });
 
-        // Populate history table
         const tbody = document.querySelector('#historyTable tbody');
         recs.sort((a,b) => parseDateStr(b.Date) - parseDateStr(a.Date)).forEach(r => {
           const trophy = parseInt(r.Position) === 1 ? '🏆' : '';
