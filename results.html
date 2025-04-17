@@ -110,7 +110,7 @@
 
           const table = document.createElement('table');
           const thead = document.createElement('thead');
-          const cols = ['Position', 'Name', isStable ? 'Stableford' : 'Net Score', 'Points', 'Winnings'];
+          const cols = ['Position', 'Name', isStable ? 'Stableford Points' : 'Net Score', 'Points', 'Winnings'];
           thead.innerHTML = `<tr>${cols.map(col => `<th>${col}</th>`).join('')}</tr>`;
           table.appendChild(thead);
 
