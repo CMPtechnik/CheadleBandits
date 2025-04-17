@@ -12,22 +12,26 @@
   <meta name="apple-mobile-web-app-title" content="Cheadle Golf League">
   <meta name="theme-color" content="#005c41" />
 
-  <!-- Chart.js & XLSX -->
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Chart.js & PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
   <style>
     :root {
-      --primary: #15171f;
-      --accent: #d6dfdd;
-      --text: #1e1e1e;
-      --bg: #fdfdfd;
-      --border: #ccc;
-      --hover: #f1f1f1;
+      --primary: #005c41;
+      --accent: #f1f5f8;
+      --text: #333;
+      --bg: #fafafa;
+      --hover: #e3e3e3;
+      --card-bg: #ffffff;
+      --border: #ddd;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Poppins', sans-serif;
       margin: 0;
       background: var(--bg);
       color: var(--text);
@@ -36,152 +40,133 @@
 
     .dark-mode {
       --bg: #121212;
-      --text: #f5f5f5;
-      --accent: #1f2b27;
+      --text: #e0e0e0;
+      --accent: #2e3b36;
       --border: #444;
-      --hover: #1e1e1e;
-    }
-
-    .dark-mode table,
-    .dark-mode th,
-    .dark-mode td,
-    .dark-mode .modal-content {
-      background-color: #1e1e1e;
-      color: var(--text);
-    }
-
-    .dark-mode th {
-      background-color: #2a2a2a;
-    }
-
-    .dark-mode .tooltip-bubble {
-      background: #f5f5f5;
-      color: #111;
-    }
-
-    .dark-mode a {
-      color: #80ffd3;
     }
 
     header {
       background: var(--primary);
       color: white;
-      padding: 1rem;
+      padding: 1rem 0;
       text-align: center;
       position: relative;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     header img {
-      max-height: 350px;
+      max-height: 100px;
+      margin-bottom: 10px;
     }
 
     header h1 {
-      margin: 0.5rem 0 0;
+      margin: 0;
+      font-weight: 600;
+      font-size: 2rem;
     }
 
     #darkModeToggle {
       position: absolute;
       top: 10px;
-      right: 15px;
-      cursor: pointer;
+      right: 20px;
       font-size: 1.5rem;
+      cursor: pointer;
     }
 
-       /* Link to results page under Darkmode link */
-       #resultsLink {
-         position: absolute;
-         top: 75px;
-         right: 15px;
-         font-size: 0.9rem;
-         color: white;
-         text-decoration: none;
-         background: rgba(0,0,0,0.2);
-         padding: 2px 6px;
-         border-radius: 4px;
-       }
-       /* Link to profile page under results link */
-       #profileLink {
-         position: absolute;
-         top: 105px;
-         right: 15px;
-         font-size: 0.9rem;
-         color: white;
-         text-decoration: none;
-         background: rgba(0,0,0,0.2);
-         padding: 2px 6px;
-         border-radius: 4px;
-       }
+    #resultsLink, #profileLink {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      font-size: 0.9rem;
+      color: white;
+      background: rgba(0,0,0,0.3);
+      padding: 5px 10px;
+      border-radius: 4px;
+      text-decoration: none;
+    }
 
     .info-bar {
       background: var(--accent);
+      padding: 1rem;
       text-align: center;
-      padding: 0.5rem;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      color: #333;
+      margin-bottom: 20px;
     }
 
     main {
       max-width: 1100px;
       margin: auto;
-      padding: 1rem;
+      padding: 20px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    .league-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
     }
 
-    th, td {
-      border: 1px solid var(--border);
-      padding: 10px;
+    .league-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 15px;
       text-align: center;
+      transition: transform 0.3s ease;
     }
 
-    th {
-      background: var(--accent);
-      position: sticky;
-      top: 0;
-      z-index: 1;
+    .league-card:hover {
+      transform: translateY(-10px);
     }
 
-    tbody tr:nth-child(even) {
-      background: #f9f9f9;
-    }
-
-    tbody tr:hover {
-      background: var(--hover);
-    }
-
-    a {
+    .league-card h3 {
+      font-size: 1.5rem;
       color: var(--primary);
-      text-decoration: none;
-      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .league-card p {
+      font-size: 1rem;
+      margin: 5px 0;
     }
 
     .trophy {
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
+      font-size: 1.5rem;
+      color: #ff9f00;
+      margin-top: 10px;
     }
 
-    .tooltip-bubble {
-      display: none;
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
+    .modal-content {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .tabs button {
+      padding: 10px 20px;
+      background: var(--primary);
       color: white;
-      padding: 5px 8px;
-      border-radius: 5px;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      z-index: 1000;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
     }
 
-    .trophy.show-tooltip .tooltip-bubble {
-      display: block;
+    .tabs button:hover {
+      background: #003d29;
+    }
+
+    .tabs button.active {
+      background: #003d29;
     }
 
     .modal {
@@ -189,74 +174,53 @@
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.5);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
 
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
     .close-btn {
-      float: right;
-      font-size: 20px;
+      font-size: 1.5rem;
       cursor: pointer;
-    }
-
-    .tabs {
-      text-align: center;
-      margin: 1rem 0;
-    }
-
-    .tabs button {
-      padding: 0.5rem 1rem;
-      margin: 0 0.25rem;
+      color: #333;
+      background: none;
       border: none;
-      border-radius: 4px;
-      background: var(--accent);
+    }
+
+    .modal-content h2 {
+      font-size: 1.8rem;
       color: var(--primary);
-      font-weight: 600;
-      cursor: pointer;
+      margin-bottom: 20px;
     }
 
-    .tabs button.active {
-      background: var(--primary);
-      color: white;
+    .modal-content ul {
+      list-style: none;
+      padding: 0;
     }
 
-    #scoreChart, #positionChart {
-      margin-bottom: 1rem;
-    }
-
-    #nextCompetition {
-      text-align: center;
-      padding: 1rem;
+    .modal-content li {
+      padding: 8px 0;
       font-size: 1rem;
-      background: var(--accent);
-      margin: 1rem auto;
-      max-width: 1100px;
-      border-radius: 5px;
     }
 
-    @media screen and (max-width: 768px) {
-      table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.6rem;
       }
 
-      .tabs {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+      .league-cards {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+
+      .league-cards {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -272,35 +236,17 @@
 
   <div class="info-bar">
     <h4><font color="#FF0000">Loading update...</font></h4>
-    <center>SS = Single Stableford | MM = Monthly Medal</center>
-    <center>BC = Board Comp</center>
-    <br><center>⬅️➡️ Scroll to view full table</center>
+    <center>⬅️➡️ Scroll to view full table</center>
   </div>
 
   <main>
-    <table id="league-table">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Name</th>
-          <th>Games</th>
-          <th>Net Win %</th>
-          <th>Total Points</th>
-          <th>Total Winnings</th>
-          <th>Trophies</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="league-cards" id="leagueCards"></div>
   </main>
 
-  <div id="nextCompetition">
-    Next Competition: <span id="nextCompetitionText">TBD</span>
-  </div>
-
+  <!-- Player Modal -->
   <div class="modal" id="scoreModal">
     <div class="modal-content">
-      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <button class="close-btn" onclick="closeModal()">&times;</button>
       <h2 id="modalTitle"></h2>
       <div class="tabs">
         <button id="tabNet" onclick="showTab('net')" class="active">Net Scores</button>
@@ -316,6 +262,7 @@
 
   <script>
     let history = [];
+    let nextCompetition = 'TBD';
 
     function parseDateStr(dateStr) {
       if (typeof dateStr === 'string' && dateStr.includes('/')) {
@@ -326,47 +273,37 @@
       }
     }
 
-    fetch("https://raw.githubusercontent.com/cmptechnik/CheadleBandits/main/data/leaguedata.xlsx?v=" + new Date().getTime())
-      .then(res => res.arrayBuffer())
-      .then(buffer => {
-        const workbook = XLSX.read(buffer, { type: 'array' });
-        const settingsSheet = workbook.Sheets['Settings'];
-        if (settingsSheet) {
-          const settingsData = XLSX.utils.sheet_to_json(settingsSheet, { header: 1 });
-          let championsPot, nextCompetition;
-          settingsData.forEach(row => {
-            if (row[0]) {
-              const key = row[0].toString().toLowerCase();
-              if (key.includes('league champions pot')) {
-                championsPot = row[1];
-              } else if (key.includes('next competition')) {
-                nextCompetition = row[1];
+    // Fetching data from Google Sheets
+    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSiPpCQyTxZpfnYmTgE5eIz4G2bd_pGGxDxBhW99h5nUJGrXb5tAt9wNKN0CuKceQwZKr7u09xy8H5mE/pub?output=csv")
+      .then(res => res.text())
+      .then(csv => {
+        const parsedData = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+        history = parsedData;
+
+        // Now, fetch the Settings sheet to get the next competition
+        fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSiPpCQyTxZpfnYmTgE5eIz4G2bd_pGGxDxBhW99h5nUJGrXb5tAt9wNKN0CuKceQwZKr7u09xy8H5mE/pub?output=csv&gid=0")
+          .then(res => res.text())
+          .then(csvSettings => {
+            const settingsData = Papa.parse(csvSettings, { header: true, skipEmptyLines: true }).data;
+
+            // Extract the "Next Competition" from the settings sheet
+            settingsData.forEach(row => {
+              if (row.Key && row.Value) {
+                if (row.Key.toLowerCase().includes('next competition')) {
+                  nextCompetition = row.Value;  // Store the "Next Competition" value
+                }
               }
-            }
-          });
-          if (championsPot) {
-            document.querySelector(".info-bar h4:nth-of-type(2)").innerHTML =
-              `League Champions Pot <u>£${championsPot}</u>`;
-          }
-          if (nextCompetition) {
+            });
+
+            // Update the info bar with the "Next Competition" value
             document.getElementById('nextCompetitionText').innerText = nextCompetition;
-          }
-        }
 
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        history = XLSX.utils.sheet_to_json(sheet);
-
-        const lastCompetitionEntry = history.reduce((latest, entry) =>
-          parseDateStr(entry.Date) > parseDateStr(latest.Date) ? entry : latest
-        , history[0]);
-
-        const lastCompetition = lastCompetitionEntry.Competition;
-        const lastUpdate = parseDateStr(lastCompetitionEntry.Date).toLocaleDateString();
-        document.querySelector(".info-bar h4").innerHTML =
-          `<font color="#FF0000">Last Update - ${lastUpdate}</font> | Last Competition: ${lastCompetition}`;
-
-        updateLeague(history);
-      });
+            // Proceed to update the league data
+            updateLeague(history);
+          })
+          .catch(err => console.error('Error fetching settings sheet:', err));
+      })
+      .catch(err => console.error('Error fetching main sheet:', err));
 
     function updateLeague(data) {
       const netScores = {}, netWins = {}, totalPoints = {}, totalWinnings = {}, rounds = {};
@@ -375,26 +312,26 @@
         const { Name, Score, Position, Points, Winnings, Competition } = entry;
         const net = parseFloat(Score);
         if (isNaN(net)) return;
-        netScores[Name] = netScores[Name]||[];
-        rounds[Competition] = rounds[Competition]||[];
+        netScores[Name] = netScores[Name] || [];
+        rounds[Competition] = rounds[Competition] || [];
         netScores[Name].push(net);
         rounds[Competition].push({ name: Name, position: parseInt(Position) });
-        totalPoints[Name] = (totalPoints[Name]||0) + (parseFloat(Points)||0);
-        totalWinnings[Name] = (totalWinnings[Name]||0) + (parseFloat(Winnings)||0);
+        totalPoints[Name] = (totalPoints[Name] || 0) + (parseFloat(Points) || 0);
+        totalWinnings[Name] = (totalWinnings[Name] || 0) + (parseFloat(Winnings) || 0);
       });
 
       Object.values(rounds).forEach(players =>
-        players.filter(p => p.position===1).forEach(p =>
-          netWins[p.name] = (netWins[p.name]||0) +1
+        players.filter(p => p.position === 1).forEach(p =>
+          netWins[p.name] = (netWins[p.name] || 0) + 1
         )
       );
 
       const players = Object.keys(netScores).map(name => {
         const games = netScores[name].length;
-        const wins = netWins[name]||0;
-        const winPct = ((wins/games)*100).toFixed(1);
+        const wins = netWins[name] || 0;
+        const winPct = ((wins / games) * 100).toFixed(1);
         return { name, games, winPct, points: totalPoints[name], winnings: totalWinnings[name], trophies: wins };
-      }).sort((a,b) => {
+      }).sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
         if (b.trophies !== a.trophies) return b.trophies - a.trophies;
         if (parseFloat(b.winPct) !== parseFloat(a.winPct))
@@ -403,111 +340,50 @@
         return a.name.localeCompare(b.name);
       });
 
-      renderTable(players);
+      renderLeagueCards(players);
     }
 
-    function renderTable(data) {
-      const tbody = document.querySelector("#league-table tbody");
-      tbody.innerHTML = '';
-      data.forEach((p,i) => {
-        const won = history.filter(e=>e.Name===p.name&&parseInt(e.Position)===1)
-                           .map(e=>e.Competition);
+    function renderLeagueCards(data) {
+      const container = document.getElementById("leagueCards");
+      container.innerHTML = '';
+      data.forEach((p, i) => {
+        const won = history.filter(e => e.Name === p.name && parseInt(e.Position) === 1)
+          .map(e => e.Competition);
         const span = won.length
           ? `<span class="trophy" onclick="toggleTooltip(this)">
                ${'🏆'.repeat(won.length)}
                <span class="tooltip-bubble">${won.join(', ')}</span>
              </span>`
           : '';
-        tbody.innerHTML += `
-          <tr>
-            <td>${i+1}</td>
-            <td><a href="#" onclick="showPlayerModal('${p.name}')">${p.name}</a></td>
-            <td>${p.games}</td>
-            <td>${p.winPct}%</td>
-            <td>${p.points}</td>
-            <td>£${p.winnings.toFixed(2)}</td>
-            <td>${span}</td>
-          </tr>`;
+
+        container.innerHTML += `
+          <div class="league-card">
+            <h3>${p.name}</h3>
+            <p>Games: ${p.games}</p>
+            <p>Win %: ${p.winPct}%</p>
+            <p>Total Points: ${p.points}</p>
+            <p>Total Winnings: £${p.winnings.toFixed(2)}</p>
+            <p>${span}</p>
+          </div>`;
       });
     }
 
-    function toggleTooltip(el){
-      document.querySelectorAll('.trophy.show-tooltip').forEach(t=>{
-        if(t!==el) t.classList.remove('show-tooltip');
+    function toggleTooltip(el) {
+      document.querySelectorAll('.trophy.show-tooltip').forEach(t => {
+        if (t !== el) t.classList.remove('show-tooltip');
       });
       el.classList.toggle('show-tooltip');
     }
-    document.addEventListener('click',e=>{
-      if(!e.target.closest('.trophy'))
-        document.querySelectorAll('.trophy.show-tooltip').forEach(t=>t.classList.remove('show-tooltip'));
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.trophy'))
+        document.querySelectorAll('.trophy.show-tooltip').forEach(t => t.classList.remove('show-tooltip'));
     });
 
-    function showPlayerModal(name){
-      const scores = history.filter(e=>e.Name===name)
-        .map(e=>({competition:e.Competition,score:parseFloat(e.Score),
-                 position:e.Position,points:parseFloat(e.Points)||0,
-                 winnings:parseFloat(e.Winnings)||0,date:e.Date}))
-        .sort((a,b)=>parseDateStr(a.date)-parseDateStr(b.date));
-
-      document.getElementById('modalTitle').innerText = `${name}'s Score History`;
-      const scoreList = document.getElementById('scoreList');
-      const posList   = document.getElementById('positionList');
-      scoreList.innerHTML = '';
-      posList.innerHTML = '';
-
-      scores.forEach(s=>{
-        const trophy = s.position==1?' 🏆':'';
-        scoreList.innerHTML   += `<li>${s.competition}: Net ${s.score}, Position ${s.position}, Winnings £${s.winnings.toFixed(2)}${trophy}</li>`;
-        posList.innerHTML     += `<li>${s.competition}: Finished ${s.position}, Points ${s.points}, Winnings £${s.winnings.toFixed(2)}${trophy}</li>`;
-      });
-
-      const labels = scores.map(s=>s.competition);
-      const netData = scores.map(s=>s.score);
-      const posData = scores.map(s=>s.position);
-
-      const ctxNet = document.getElementById('scoreChart').getContext('2d');
-      if(window.scoreChart instanceof Chart) window.scoreChart.destroy();
-      window.scoreChart = new Chart(ctxNet,{
-        type:'line',
-        data:{labels,datasets:[
-          {label:'Net Score',data:netData,borderColor:'blue',fill:false},
-          {label:'Par 64',data:new Array(labels.length).fill(64),borderColor:'red',borderDash:[5,5],fill:false}
-        ]},
-        options:{responsive:true}
-      });
-
-      const ctxPos = document.getElementById('positionChart').getContext('2d');
-      if(window.positionChart instanceof Chart) window.positionChart.destroy();
-      window.positionChart = new Chart(ctxPos,{
-        type:'line',
-        data:{labels,datasets:[
-          {label:'Results',data:posData,borderColor:'green',fill:false}
-        ]},
-        options:{scales:{y:{reverse:true,title:{display:true,text:'Finishing Position'}}}}
-      });
-
-      showTab('net');
-      document.getElementById('scoreModal').style.display='flex';
-    }
-
-    function showTab(tab){
-      ['tabNet','tabPositions','tabHistory'].forEach(id=>document.getElementById(id).classList.remove('active'));
-      document.getElementById('tab'+(tab==='net'?'Net':tab==='positions'?'Positions':'History')).classList.add('active');
-      document.getElementById('scoreList').style.display = tab==='net'?'block':'none';
-      document.getElementById('positionList').style.display = tab==='positions'?'block':'none';
-      document.getElementById('scoreChart').style.display  = tab==='net'?'block':'none';
-      document.getElementById('positionChart').style.display = tab==='history'?'block':'none';
-    }
-
-    function closeModal(){
-      document.getElementById('scoreModal').style.display='none';
-    }
-
-    function toggleDarkMode(){
+    function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');
     }
   </script>
-
 
   <center>Build v3.0.0 | New Layout</center>
   <br>
