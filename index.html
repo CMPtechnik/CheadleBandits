@@ -8,8 +8,7 @@
   <!-- Favicon & Apple Icons -->
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="favicon.png" sizes="180x180">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Cheadle Golf League">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#005c41" />
 
   <!-- Google Fonts -->
@@ -35,14 +34,6 @@
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .dark-mode {
-      --bg: #121212;
-      --text: #e0e0e0;
-      --accent: #2e3b36;
-      --border: #444;
     }
 
     header {
@@ -50,39 +41,6 @@
       color: white;
       padding: 1rem 0;
       text-align: center;
-      position: relative;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    header img {
-      max-height: 100px;
-      margin-bottom: 10px;
-    }
-
-    header h1 {
-      margin: 0;
-      font-weight: 600;
-      font-size: 2rem;
-    }
-
-    #darkModeToggle {
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    #resultsLink, #profileLink {
-      position: absolute;
-      top: 60px;
-      right: 20px;
-      font-size: 0.9rem;
-      color: white;
-      background: rgba(0,0,0,0.3);
-      padding: 5px 10px;
-      border-radius: 4px;
-      text-decoration: none;
     }
 
     .info-bar {
@@ -144,6 +102,7 @@
       width: 90%;
     }
 
+    /* Styling for tabs and modal */
     .tabs {
       display: flex;
       justify-content: center;
@@ -188,22 +147,6 @@
       border: none;
     }
 
-    .modal-content h2 {
-      font-size: 1.8rem;
-      color: var(--primary);
-      margin-bottom: 20px;
-    }
-
-    .modal-content ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .modal-content li {
-      padding: 8px 0;
-      font-size: 1rem;
-    }
-
     @media (max-width: 768px) {
       header h1 {
         font-size: 1.6rem;
@@ -237,28 +180,12 @@
   <div class="info-bar">
     <h4><font color="#FF0000">Loading update...</font></h4>
     <center>⬅️➡️ Scroll to view full table</center>
+    <center><span id="nextCompetitionText">Next Competition: Loading...</span></center> <!-- Added span here -->
   </div>
 
   <main>
     <div class="league-cards" id="leagueCards"></div>
   </main>
-
-  <!-- Player Modal -->
-  <div class="modal" id="scoreModal">
-    <div class="modal-content">
-      <button class="close-btn" onclick="closeModal()">&times;</button>
-      <h2 id="modalTitle"></h2>
-      <div class="tabs">
-        <button id="tabNet" onclick="showTab('net')" class="active">Net Scores</button>
-        <button id="tabPositions" onclick="showTab('positions')">Competition History</button>
-        <button id="tabHistory" onclick="showTab('history')">Results History</button>
-      </div>
-      <canvas id="scoreChart" height="200"></canvas>
-      <canvas id="positionChart" height="200" style="display:none;"></canvas>
-      <ul id="scoreList"></ul>
-      <ul id="positionList" style="display:none;"></ul>
-    </div>
-  </div>
 
   <script>
     let history = [];
@@ -273,15 +200,19 @@
       }
     }
 
-    // Fetching data from Google Sheets
-    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSiPpCQyTxZpfnYmTgE5eIz4G2bd_pGGxDxBhW99h5nUJGrXb5tAt9wNKN0CuKceQwZKr7u09xy8H5mE/pub?output=csv")
+    // Correct Google Sheets URL (ensure both are correct CSV export links)
+    const mainSheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv";
+    const settingsSheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv&gid=0";
+
+    // Fetching data from the Main Sheet (Player Data)
+    fetch(mainSheetCSV)
       .then(res => res.text())
       .then(csv => {
         const parsedData = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
         history = parsedData;
 
         // Now, fetch the Settings sheet to get the next competition
-        fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSiPpCQyTxZpfnYmTgE5eIz4G2bd_pGGxDxBhW99h5nUJGrXb5tAt9wNKN0CuKceQwZKr7u09xy8H5mE/pub?output=csv&gid=0")
+        fetch(settingsSheetCSV)
           .then(res => res.text())
           .then(csvSettings => {
             const settingsData = Papa.parse(csvSettings, { header: true, skipEmptyLines: true }).data;
@@ -296,7 +227,7 @@
             });
 
             // Update the info bar with the "Next Competition" value
-            document.getElementById('nextCompetitionText').innerText = nextCompetition;
+            document.getElementById('nextCompetitionText').innerText = `Next Competition: ${nextCompetition}`;
 
             // Proceed to update the league data
             updateLeague(history);
