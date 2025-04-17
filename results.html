@@ -101,7 +101,7 @@
 
         const container = document.getElementById('content');
         comps.forEach(c => {
-          const isStable = c.title.toLowerCase().includes('stableford') && hasSFcol;
+          const isStable = c.title.toLowerCase().includes('stableford') || hasSFcol;
 
           const section = document.createElement('section');
           const header = document.createElement('h2');
