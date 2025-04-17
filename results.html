@@ -76,7 +76,7 @@
       return new Date(s);
     }
 
-    fetch('https://raw.githubusercontent.com/CMPtechnik/TheLeague/main/data/leaguedata.xlsx?v=' + Date.now())
+    fetch('https://raw.githubusercontent.com/cmptechnik/CheadleBandits/main/data/leaguedata.xlsx?v=' + Date.now())
       .then(res => res.arrayBuffer())
       .then(buf => {
         const wb = XLSX.read(buf, { type: 'array' });
