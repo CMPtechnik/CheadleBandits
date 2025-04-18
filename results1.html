@@ -8,15 +8,12 @@
   <link rel="apple-touch-icon" href="favicon.png" sizes="180x180">
   <meta name="theme-color" content="#005c41" />
   <style>
-    /* Root colors for consistency */
     :root {
-      --primary: #005c41;  /* Primary color */
-      --accent: #d6dfdd;   /* Accent color */
-      --text: #333;        /* Text color */
-      --bg: #fafafa;       /* Background color */
-      --border: #ddd;      /* Border color */
-      --dark-bg: #121212;  /* Dark background for dark mode */
-      --dark-text: #f5f5f5; /* Dark text for dark mode */
+      --primary: #005c41;
+      --accent: #d6dfdd;
+      --text: #333;
+      --bg: #fafafa;
+      --border: #ddd;
     }
 
     body {
@@ -27,7 +24,6 @@
       transition: background 0.3s, color 0.3s;
     }
 
-    /* Header Styling */
     header {
       background: var(--primary);
       color: white;
@@ -91,7 +87,6 @@
       background-color: var(--hover);
     }
 
-    /* Trophy Styling */
     .trophy {
       font-size: 1.5rem;
       color: #ff9f00;
@@ -165,11 +160,26 @@
       return new Date(s);
     }
 
-    // Use the correct Google Sheets CSV export link
+    // Fetching data from the Google Sheets CSV link
     fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv')
-      .then(res => res.text())
+      .then(res => {
+        if (!res.ok) {
+          console.error('Failed to fetch data:', res.statusText);
+          return;
+        }
+        return res.text();
+      })
       .then(csv => {
+        console.log('CSV Data:', csv);  // Debugging: log the CSV content
         const parsedData = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+
+        // Check if data is correctly parsed
+        if (parsedData.length === 0) {
+          console.error('No data found.');
+          return;
+        }
+
+        console.log('Parsed Data:', parsedData);  // Debugging: log parsed data
 
         const hasSFcol = parsedData.length && parsedData[0].hasOwnProperty('Stableford Points');
 
@@ -227,5 +237,8 @@
       })
       .catch(err => console.error('Error fetching data from Google Sheets:', err));
   </script>
+  <center>Results Build v1 Pulling from Google Sheets</center>
+  <br>
+  <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
 </html>
