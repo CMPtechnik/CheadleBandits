@@ -76,6 +76,7 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+      overflow-x: auto;
     }
 
     th, td {
@@ -124,15 +125,51 @@
       display: block;
     }
 
+    /* Media Queries for Responsiveness */
     @media (max-width: 768px) {
       header h1 {
         font-size: 1.8rem;
+      }
+
+      th, td {
+        font-size: 0.9rem;
+        padding: 10px;
+      }
+
+      table {
+        overflow-x: auto;
+        display: block;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .info-bar {
+        font-size: 0.85rem;
+        padding: 0.75rem;
+      }
+
+      .trophy {
+        font-size: 1.3rem;
       }
     }
 
     @media (max-width: 480px) {
       header h1 {
         font-size: 1.6rem;
+      }
+
+      th, td {
+        font-size: 0.8rem;
+        padding: 8px;
+      }
+
+      .info-bar {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+      }
+
+      .trophy {
+        font-size: 1.2rem;
       }
     }
   </style>
@@ -317,7 +354,7 @@
     }
   </script>
 
-  <center>Build v1.0.5 | Trophy and Tooltips last attempt</center>
+  <center>Build v1.0.6.1 | New Mobile Layout</center>
   <br>
   <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
