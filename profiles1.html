@@ -9,16 +9,110 @@
   <meta name="theme-color" content="#005c41" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <style>
-    :root { --primary: #15171f; --accent: #d6dfdd; --text: #1e1e1e; --bg: #fdfdfd; }
-    body { margin:0; font-family:'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
-    header { background:var(--primary); color:#fff; padding:1rem; text-align:center; }
-    header nav a { color:#fff; text-decoration:none; margin:0 0.5rem; }
-    main { max-width:600px; margin:2rem auto; padding:0 1rem; }
-    ul { list-style:none; padding:0; }
-    li { margin:0.5rem 0; }
-    a.profile-link { color: var(--primary); text-decoration: none; font-size:1.1rem; }
-    a.profile-link:hover { text-decoration: underline; }
-    .loading { text-align:center; margin-top:2rem; color:#666; }
+    :root {
+      --primary: #005c41;
+      --accent: #d6dfdd;
+      --text: #1e1e1e;
+      --bg: #f8f8f8;
+      --border: #ddd;
+      --hover-bg: #f0f0f0;
+      --link-hover: #007d3f;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1.5rem 1rem;
+      text-align: center;
+    }
+
+    header nav {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 1rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      font-size: 1.2rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      margin: 1rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    li:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+
+    .profile-link:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
+
+    @media screen and (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      li {
+        padding: 0.8rem;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -28,12 +122,14 @@
       <a href="results.html">Results</a> |
       <strong>All Players</strong>
     </nav>
-  </header>
-  <main>
     <h1>All Player Profiles</h1>
-    <div id="loading" class="loading">Loading players...</div>
-    <ul id="playerList"></ul>
+    <center>⬅️➡️ Scroll to view full table</center>
+  </header>
+
+  <main id="content">
+    <!-- Player list will be injected here -->
   </main>
+
   <script>
     // Google Sheets CSV export URL
     const googleSheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv';
@@ -44,12 +140,17 @@
         // Use PapaParse to parse the CSV data
         const parsedData = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
 
+        if (parsedData.length === 0) {
+          console.error('No data found.');
+          return;
+        }
+
         // Extract the unique player names and sort them alphabetically
         const names = [...new Set(parsedData.map(r => r.Name).filter(n => n))];
         names.sort((a,b) => a.localeCompare(b));
 
         // Populate the player list with links
-        const list = document.getElementById('playerList');
+        const list = document.getElementById('content');
         list.innerHTML = names.map(name => {
           const url = `profile.html?name=${encodeURIComponent(name)}`;
           return `<li><a class="profile-link" href="${url}">${name}</a></li>`;
@@ -62,7 +163,8 @@
       });
   </script>
 </body>
-<center>Profiles Build v1 Pulling from Google Sheets</center>
+</body>
+<center>Profiles Build v1.0.1 Adding Player Cards</center>
 <br>
 <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </html>
