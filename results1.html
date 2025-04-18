@@ -170,17 +170,12 @@
         return res.text();
       })
       .then(csv => {
-        console.log('CSV Data:', csv);  // Debugging: log the CSV content
         const parsedData = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
 
         if (parsedData.length === 0) {
           console.error('No data found.');
           return;
         }
-
-        console.log('Parsed Data:', parsedData);  // Debugging: log parsed data
-
-        const hasSFcol = parsedData.length && parsedData[0].hasOwnProperty('Stableford Points');
 
         const groups = {};
         parsedData.forEach(r => {
@@ -200,7 +195,7 @@
         const container = document.getElementById('content');
         comps.forEach(c => {
           // Check for Stableford or Net Score
-          const isStable = c.title.toLowerCase().includes('stableford') || hasSFcol;
+          const isStable = c.title.toLowerCase().includes('stableford');
 
           const section = document.createElement('section');
           const header = document.createElement('h2');
@@ -216,9 +211,9 @@
           const tbody = document.createElement('tbody');
           c.records.sort((a, b) => parseInt(a.Position) - parseInt(b.Position));
           c.records.forEach(r => {
-            const win = isNaN(parseFloat(r.Winnings)) ? 0 : parseFloat(r.Winnings);
-            const sf = isNaN(parseInt(r['Stableford Points'])) ? 0 : parseInt(r['Stableford Points']);
-            const netScore = isNaN(parseFloat(r.Score)) ? 0 : parseFloat(r.Score);
+            const win = parseFloat(r.Winnings) || 0;
+            const sf = parseFloat(r['Stableford Points']) || 0;
+            const netScore = parseFloat(r.Score) || 0;
 
             const tdValues = [
               r.Position,
@@ -239,6 +234,8 @@
       })
       .catch(err => console.error('Error fetching data from Google Sheets:', err));
   </script>
-  V5
+  <center>Results Build v6.1 Golf Type added to handle net and stableford scores</center>
+  <br>
+  <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
 </html>
