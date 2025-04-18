@@ -19,6 +19,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
   <style>
+    /* Root colors for consistency */
     :root {
       --primary: #005c41;
       --accent: #f1f5f8;
@@ -27,6 +28,8 @@
       --hover: #e3e3e3;
       --card-bg: #ffffff;
       --border: #ddd;
+      --dark-bg: #121212;
+      --dark-text: #f5f5f5;
     }
 
     body {
@@ -34,136 +37,81 @@
       margin: 0;
       background: var(--bg);
       color: var(--text);
+      transition: background 0.3s, color 0.3s;
     }
 
+    /* Header Styling */
     header {
       background: var(--primary);
       color: white;
-      padding: 1rem 0;
+      padding: 2rem 0;
       text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+    }
+
+    /* Info bar styling */
     .info-bar {
       background: var(--accent);
       padding: 1rem;
       text-align: center;
-      font-size: 0.9rem;
+      font-size: 1rem;
       color: #333;
       margin-bottom: 20px;
     }
 
+    /* Main content layout */
     main {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: auto;
       padding: 20px;
     }
 
-    .league-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
+    /* Table Layout */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
 
-    .league-card {
-      background: var(--card-bg);
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 15px;
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px 20px;
       text-align: center;
-      transition: transform 0.3s ease;
-    }
-
-    .league-card:hover {
-      transform: translateY(-10px);
-    }
-
-    .league-card h3 {
-      font-size: 1.5rem;
-      color: var(--primary);
-      margin-bottom: 15px;
-    }
-
-    .league-card p {
       font-size: 1rem;
-      margin: 5px 0;
+    }
+
+    th {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: var(--hover);
     }
 
     .trophy {
       font-size: 1.5rem;
       color: #ff9f00;
-      margin-top: 10px;
-    }
-
-    .modal-content {
-      background: var(--card-bg);
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 600px;
-      width: 90%;
-    }
-
-    /* Styling for tabs and modal */
-    .tabs {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-
-    .tabs button {
-      padding: 10px 20px;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-
-    .tabs button:hover {
-      background: #003d29;
-    }
-
-    .tabs button.active {
-      background: #003d29;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .close-btn {
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #333;
-      background: none;
-      border: none;
     }
 
     @media (max-width: 768px) {
       header h1 {
-        font-size: 1.6rem;
-      }
-
-      .league-cards {
-        grid-template-columns: 1fr 1fr;
+        font-size: 1.8rem;
       }
     }
 
     @media (max-width: 480px) {
       header h1 {
-        font-size: 1.4rem;
-      }
-
-      .league-cards {
-        grid-template-columns: 1fr;
+        font-size: 1.6rem;
       }
     }
   </style>
@@ -178,19 +126,33 @@
   </header>
 
   <div class="info-bar">
-    <h4><font color="#FF0000">Loading update...</font></h4>
-    <center>⬅️➡️ Scroll to view full table</center>
-    <center><span id="nextCompetitionText">Next Competition: Loading...</span></center> <!-- Added span here -->
+    <center><span id="nextCompetitionText">Next Competition: Loading...</span></center>
+    <center><span id="lastUpdateText">Last Update: Loading...</span></center>
   </div>
 
   <main>
-    <div class="league-cards" id="leagueCards"></div>
+    <table id="leagueTable">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Player</th>
+          <th>Games Played</th>
+          <th>Win %</th>
+          <th>Total Points</th>
+          <th>Total Winnings</th>
+          <th>Trophies</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </main>
 
   <script>
     let history = [];
     let nextCompetition = 'TBD';
+    let lastCompetition = 'TBD';
 
+    // Parsing date string to Date object (helper function)
     function parseDateStr(dateStr) {
       if (typeof dateStr === 'string' && dateStr.includes('/')) {
         const parts = dateStr.split('/');
@@ -202,7 +164,7 @@
 
     // Correct Google Sheets URL (ensure both are correct CSV export links)
     const mainSheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv";
-    const settingsSheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv&gid=0";
+    const settingsSheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv&gid=970169416";
 
     // Fetching data from the Main Sheet (Player Data)
     fetch(mainSheetCSV)
@@ -229,6 +191,16 @@
             // Update the info bar with the "Next Competition" value
             document.getElementById('nextCompetitionText').innerText = `Next Competition: ${nextCompetition}`;
 
+            // Find the most recent competition based on the "Date"
+            const mostRecent = history.reduce((latest, entry) =>
+              parseDateStr(entry.Date) > parseDateStr(latest.Date) ? entry : latest
+            , history[0]);
+
+            lastCompetition = mostRecent.Competition;
+            // Update the Last Update section
+            const lastUpdateDate = parseDateStr(mostRecent.Date).toLocaleDateString();
+            document.getElementById('lastUpdateText').innerText = `Last Update: ${lastUpdateDate} | Last Competition: ${lastCompetition}`;
+
             // Proceed to update the league data
             updateLeague(history);
           })
@@ -236,6 +208,7 @@
       })
       .catch(err => console.error('Error fetching main sheet:', err));
 
+    // Function to update the leaderboard with player data
     function updateLeague(data) {
       const netScores = {}, netWins = {}, totalPoints = {}, totalWinnings = {}, rounds = {};
 
@@ -271,46 +244,32 @@
         return a.name.localeCompare(b.name);
       });
 
-      renderLeagueCards(players);
+      renderLeagueTable(players);
     }
 
-    function renderLeagueCards(data) {
-      const container = document.getElementById("leagueCards");
-      container.innerHTML = '';
+    // Function to render player data in table
+    function renderLeagueTable(data) {
+      const tbody = document.querySelector("#leagueTable tbody");
+      tbody.innerHTML = '';
       data.forEach((p, i) => {
         const won = history.filter(e => e.Name === p.name && parseInt(e.Position) === 1)
           .map(e => e.Competition);
-        const span = won.length
-          ? `<span class="trophy" onclick="toggleTooltip(this)">
-               ${'🏆'.repeat(won.length)}
-               <span class="tooltip-bubble">${won.join(', ')}</span>
-             </span>`
-          : '';
+        const trophies = won.length > 0 ? `<span class="trophy">${'🏆'.repeat(won.length)}</span>` : '';
 
-        container.innerHTML += `
-          <div class="league-card">
-            <h3>${p.name}</h3>
-            <p>Games: ${p.games}</p>
-            <p>Win %: ${p.winPct}%</p>
-            <p>Total Points: ${p.points}</p>
-            <p>Total Winnings: £${p.winnings.toFixed(2)}</p>
-            <p>${span}</p>
-          </div>`;
+        tbody.innerHTML += `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${p.name}</td>
+            <td>${p.games}</td>
+            <td>${p.winPct}%</td>
+            <td>${p.points}</td>
+            <td>£${p.winnings.toFixed(2)}</td>
+            <td>${trophies}</td>
+          </tr>`;
       });
     }
 
-    function toggleTooltip(el) {
-      document.querySelectorAll('.trophy.show-tooltip').forEach(t => {
-        if (t !== el) t.classList.remove('show-tooltip');
-      });
-      el.classList.toggle('show-tooltip');
-    }
-
-    document.addEventListener('click', e => {
-      if (!e.target.closest('.trophy'))
-        document.querySelectorAll('.trophy.show-tooltip').forEach(t => t.classList.remove('show-tooltip'));
-    });
-
+    // Dark mode toggle function
     function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');
     }
