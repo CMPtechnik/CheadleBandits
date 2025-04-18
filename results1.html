@@ -134,7 +134,6 @@
       }
     }
   </style>
-  <!-- Include PapaParse Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
@@ -174,7 +173,6 @@
         console.log('CSV Data:', csv);  // Debugging: log the CSV content
         const parsedData = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
 
-        // Check if data is correctly parsed
         if (parsedData.length === 0) {
           console.error('No data found.');
           return;
@@ -201,6 +199,7 @@
 
         const container = document.getElementById('content');
         comps.forEach(c => {
+          // Check for Stableford or Net Score
           const isStable = c.title.toLowerCase().includes('stableford') || hasSFcol;
 
           const section = document.createElement('section');
@@ -219,10 +218,12 @@
           c.records.forEach(r => {
             const win = isNaN(parseFloat(r.Winnings)) ? 0 : parseFloat(r.Winnings);
             const sf = isNaN(parseInt(r['Stableford Points'])) ? 0 : parseInt(r['Stableford Points']);
+            const netScore = isNaN(parseFloat(r.Score)) ? 0 : parseFloat(r.Score);
+
             const tdValues = [
               r.Position,
               r.Name || '',
-              isStable ? sf : r.Score || '',
+              isStable ? sf : netScore || '',
               r.Points || '',
               `£${win.toFixed(2)}`
             ];
@@ -238,7 +239,7 @@
       })
       .catch(err => console.error('Error fetching data from Google Sheets:', err));
   </script>
-  <center>Results Build v2 Pulling from Google Sheets</center>
+  <center>Results Build v3 NetScore and Headings</center>
   <br>
   <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
