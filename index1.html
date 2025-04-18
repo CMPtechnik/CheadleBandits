@@ -101,17 +101,76 @@
     .trophy {
       font-size: 1.5rem;
       color: #ff9f00;
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
     }
 
+    /* Tooltip Styling */
+    .tooltip-bubble {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      z-index: 1000;
+    }
+
+    .trophy.show-tooltip .tooltip-bubble {
+      display: block;
+    }
+
+    /* Media Queries for Responsiveness */
     @media (max-width: 768px) {
       header h1 {
         font-size: 1.8rem;
+      }
+
+      th, td {
+        font-size: 0.9rem;
+        padding: 10px;
+      }
+
+      table {
+        overflow-x: auto;
+        display: block;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .info-bar {
+        font-size: 0.85rem;
+        padding: 0.75rem;
+      }
+
+      .trophy {
+        font-size: 1.3rem;
       }
     }
 
     @media (max-width: 480px) {
       header h1 {
         font-size: 1.6rem;
+      }
+
+      th, td {
+        font-size: 0.8rem;
+        padding: 8px;
+      }
+
+      .info-bar {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+      }
+
+      .trophy {
+        font-size: 1.2rem;
       }
     }
   </style>
@@ -126,7 +185,6 @@
   </header>
 
   <div class="info-bar">
-    <h4><font color="#FF0000">Loading update...</font></h4>
     <center><span id="nextCompetitionText">Next Competition: Loading...</span></center>
     <center><span id="lastUpdateText">Last Update: Loading...</span></center>
   </div>
@@ -252,10 +310,20 @@
     function renderLeagueTable(data) {
       const tbody = document.querySelector("#leagueTable tbody");
       tbody.innerHTML = '';
+
       data.forEach((p, i) => {
+        // Get competitions the player has won (1st place finishes)
         const won = history.filter(e => e.Name === p.name && parseInt(e.Position) === 1)
           .map(e => e.Competition);
-        const trophies = won.length > 0 ? `<span class="trophy">${'🏆'.repeat(won.length)}</span>` : '';
+
+        // Display the number of trophies (🏆) based on 1st place finishes
+        const trophies = won.length > 0
+          ? `
+            <span class="trophy" onclick="toggleTooltip(this)">
+              ${'🏆'.repeat(won.length)}  <!-- Display trophies -->
+              <span class="tooltip-bubble">${won.join(', ')}</span>  <!-- List the competitions in the tooltip -->
+            </span>`
+          : '';  // If no trophies, leave it blank
 
         tbody.innerHTML += `
           <tr>
@@ -265,7 +333,7 @@
             <td>${p.winPct}%</td>
             <td>${p.points}</td>
             <td>£${p.winnings.toFixed(2)}</td>
-            <td>${trophies}</td>
+            <td>${trophies}</td>  <!-- Add trophy count to the table -->
           </tr>`;
       });
     }
@@ -289,7 +357,7 @@
     }
   </script>
 
-  <center>Build Old Working Trophies with Added Tool Tips</center>
+  <center>Build v3 Old Working Trophies with Added Tool Tips</center>
   <br>
   <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
