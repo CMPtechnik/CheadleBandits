@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#005c41" />
   <!-- Chart.js & PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.3.0/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <style>
     :root { --primary: #15171f; --accent: #e6f2ef; --text: #1e1e1e; --bg: #fdfdfd; --border: #ccc; }
     body { margin:0; font-family:'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
@@ -119,24 +119,20 @@
         const positions = recs.map(r => parseInt(r.Position) || 0);
         const sfs = recs.map(r => parseInt(r['Stableford Points']) || 0);
 
-        // Filter out Stroke Play competitions for Net Score chart
-        const strokePlayRecs = recs.filter(r => r.Type && r.Type.toLowerCase() === 'stroke play');
-        const netScores = strokePlayRecs.map(r => parseFloat(r.Score) || 0); // Net scores only from Stroke Play
-        const strokePlayCompetitions = strokePlayRecs.map(r => r.Title || r.Competition);
-
-        // Stableford scores chart
+        // Filter out Stableford and non-Stableford scores for separate charts
+        const netScores = scores.filter((score, index) => sfs[index] === 0);
         const stablefordScores = sfs.filter(sf => sf > 0);
-        const stablefordCompetitions = competitions.filter((competition, index) => sfs[index] > 0); // Only include Stableford competitions
+        const stablefordCompetitions = competitions.filter((competition, index) => sfs[index] > 0);
 
-        // Net Score Chart with Par 64 baseline (only for Stroke Play competitions)
+        // Net Score Chart with Par 64 baseline
         const ctxScore = document.getElementById('chartScore').getContext('2d');
         new Chart(ctxScore, {
           type: 'line',
           data: {
-            labels: strokePlayCompetitions,
+            labels: competitions,
             datasets: [
               { label: 'Net Score', data: netScores, fill: false },
-              { label: 'Par 64', data: new Array(strokePlayCompetitions.length).fill(64), borderDash: [5,5], fill: false }
+              { label: 'Par 64', data: new Array(competitions.length).fill(64), borderDash: [5,5], fill: false }
             ]
           },
           options: { responsive: true }
@@ -184,7 +180,7 @@
   </script>
 </body>
 </html>
-<center>Player Profile Build v0.0.3 Net Score Filter | Pulling from Google Sheets</center>
+<center>Player Profile Build v0.0.8 Net Score Filter | Pulling from Google Sheets</center>
 <br>
 <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </html>
