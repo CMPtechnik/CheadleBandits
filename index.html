@@ -76,7 +76,6 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
-      overflow-x: auto;
     }
 
     th, td {
@@ -104,8 +103,10 @@
       color: #ff9f00;
       cursor: pointer;
       position: relative;
+      display: inline-block;
     }
 
+    /* Tooltip Styling */
     .tooltip-bubble {
       display: none;
       position: absolute;
@@ -176,13 +177,16 @@
 </head>
 <body>
   <header>
+    <div id="darkModeToggle" onclick="toggleDarkMode()">🌙</div>
+    <a id="profileLink" href="profiles.html">View Profiles</a>
+    <a id="resultsLink" href="results.html">View Results</a>
     <img src="logo.png" alt="Bandits Logo" />
     <h1>Cheadle Bandits</h1>
   </header>
 
   <div class="info-bar">
-    <center><span id="lastUpdateText">Last Update: Loading...</span></center>
     <center><span id="nextCompetitionText">Next Competition: Loading...</span></center>
+    <center><span id="lastUpdateText">Last Update: Loading...</span></center>
   </div>
 
   <main>
@@ -289,7 +293,7 @@
         const games = netScores[name].length;
         const wins = netWins[name] || 0;
         const winPct = ((wins / games) * 100).toFixed(1);
-        return { name, games, winPct, points: totalPoints[name], winnings: totalWinnings[name], trophies: wins, competitions: getCompetitions(name) };
+        return { name, games, winPct, points: totalPoints[name], winnings: totalWinnings[name], trophies: wins };
       }).sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
         if (b.trophies !== a.trophies) return b.trophies - a.trophies;
@@ -302,22 +306,24 @@
       renderLeagueTable(players);
     }
 
-    // Get competitions for each player
-    function getCompetitions(playerName) {
-      return history.filter(entry => entry.Name === playerName && parseInt(entry.Position) === 1)
-        .map(entry => entry.Competition);
-    }
-
     // Function to render player data in table
     function renderLeagueTable(data) {
       const tbody = document.querySelector("#leagueTable tbody");
       tbody.innerHTML = '';
+
       data.forEach((p, i) => {
-        const trophies = p.competitions.length > 0 ? `
-          <span class="trophy" onclick="toggleTooltip(this)">
-            🏆
-            <span class="tooltip-bubble">${p.competitions.join(', ')}</span>
-          </span>` : '';
+        // Get competitions the player has won (1st place finishes)
+        const won = history.filter(e => e.Name === p.name && parseInt(e.Position) === 1)
+          .map(e => e.Competition);
+
+        // Display the number of trophies (🏆) based on 1st place finishes
+        const trophies = won.length > 0
+          ? `
+            <span class="trophy" onclick="toggleTooltip(this)">
+              ${'🏆'.repeat(won.length)}  <!-- Display trophies -->
+              <span class="tooltip-bubble">${won.join(', ')}</span>  <!-- List the competitions in the tooltip -->
+            </span>`
+          : '';  // If no trophies, leave it blank
 
         tbody.innerHTML += `
           <tr>
@@ -327,7 +333,7 @@
             <td>${p.winPct}%</td>
             <td>${p.points}</td>
             <td>£${p.winnings.toFixed(2)}</td>
-            <td>${trophies}</td>
+            <td>${trophies}</td>  <!-- Add trophy count to the table -->
           </tr>`;
       });
     }
@@ -351,7 +357,7 @@
     }
   </script>
 
-  <center>Build v1.0.6.1 | New Mobile Layout</center>
+  <center>Build v3 Old Working Trophies with Added Tool Tips</center>
   <br>
   <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
