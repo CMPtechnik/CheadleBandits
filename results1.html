@@ -134,6 +134,8 @@
       }
     }
   </style>
+  <!-- Include PapaParse Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
   <header>
@@ -150,7 +152,6 @@
     <!-- Competition sections injected here -->
   </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script>
     function parseDateStr(s) {
       if (typeof s === 'string' && s.includes('/')) {
@@ -237,7 +238,7 @@
       })
       .catch(err => console.error('Error fetching data from Google Sheets:', err));
   </script>
-  <center>Results Build v1 Pulling from Google Sheets</center>
+  <center>Results Build v2 Pulling from Google Sheets</center>
   <br>
   <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
