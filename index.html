@@ -101,6 +101,27 @@
     .trophy {
       font-size: 1.5rem;
       color: #ff9f00;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .tooltip-bubble {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      z-index: 1000;
+    }
+
+    .trophy.show-tooltip .tooltip-bubble {
+      display: block;
     }
 
     @media (max-width: 768px) {
@@ -234,7 +255,7 @@
         const games = netScores[name].length;
         const wins = netWins[name] || 0;
         const winPct = ((wins / games) * 100).toFixed(1);
-        return { name, games, winPct, points: totalPoints[name], winnings: totalWinnings[name], trophies: wins };
+        return { name, games, winPct, points: totalPoints[name], winnings: totalWinnings[name], trophies: wins, competitions: getCompetitions(name) };
       }).sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
         if (b.trophies !== a.trophies) return b.trophies - a.trophies;
@@ -247,14 +268,22 @@
       renderLeagueTable(players);
     }
 
+    // Get competitions for each player
+    function getCompetitions(playerName) {
+      return history.filter(entry => entry.Name === playerName && parseInt(entry.Position) === 1)
+        .map(entry => entry.Competition);
+    }
+
     // Function to render player data in table
     function renderLeagueTable(data) {
       const tbody = document.querySelector("#leagueTable tbody");
       tbody.innerHTML = '';
       data.forEach((p, i) => {
-        const won = history.filter(e => e.Name === p.name && parseInt(e.Position) === 1)
-          .map(e => e.Competition);
-        const trophies = won.length > 0 ? `<span class="trophy">${'🏆'.repeat(won.length)}</span>` : '';
+        const trophies = p.competitions.length > 0 ? `
+          <span class="trophy" onclick="toggleTooltip(this)">
+            🏆
+            <span class="tooltip-bubble">${p.competitions.join(', ')}</span>
+          </span>` : '';
 
         tbody.innerHTML += `
           <tr>
@@ -268,6 +297,19 @@
           </tr>`;
       });
     }
+
+    // Function to toggle tooltip on trophy icon
+    function toggleTooltip(el) {
+      document.querySelectorAll('.trophy.show-tooltip').forEach(t => {
+        if (t !== el) t.classList.remove('show-tooltip');
+      });
+      el.classList.toggle('show-tooltip');
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.trophy'))
+        document.querySelectorAll('.trophy.show-tooltip').forEach(t => t.classList.remove('show-tooltip'));
+    });
 
     // Dark mode toggle function
     function toggleDarkMode() {
