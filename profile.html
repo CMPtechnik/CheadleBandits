@@ -12,25 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    :root { --primary: #15171f; --accent: #e6f2ef; --text: #1e1e1e; --bg: #fdfdfd; --border: #ccc; }
-    body { margin:0; font-family:'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
-    header { background:var(--primary); color:#fff; padding:1rem; text-align:center; }
-    header nav a { color:#fff; text-decoration:none; margin:0 0.5rem; font-size:0.9rem; }
-    #profileHeader { max-width:800px; margin:2rem auto; text-align:center; }
-    #profileHeader .avatar { width:100px; height:100px; border-radius:50%; object-fit:cover; }
-    #profileHeader h1 { margin:0.5rem 0; }
-    #profileHeader ul { list-style:none; padding:0; margin:0.5rem 0; display:flex; justify-content:center; gap:1rem; }
-    #charts { max-width:800px; margin:2rem auto; display:grid; gap:2rem; }
-    canvas { width:100% !important; height:300px !important; }
-    #historySection { max-width:800px; margin:2rem auto; }
-    #historyTable { width:100%; border-collapse:collapse; }
-    #historyTable th, #historyTable td { border:1px solid var(--border); padding:8px; text-align:center; }
-    #historyTable th { background:var(--accent); }
-    .no-data { text-align:center; margin:2rem auto; font-size:1.2rem; color:#666; }
-    @media screen and (max-width:768px) {
-      #charts { display:block; }
-      #charts canvas { height:200px !important; }
-    }
+    body { font-family: 'Segoe UI', sans-serif; }
   </style>
 </head>
 <body>
@@ -42,135 +24,45 @@
     </nav>
   </header>
 
+  <h1>Player Profile</h1>
   <div id="profileHeader"></div>
-
-  <div id="charts" style="display:none;">
-    <canvas id="chartScore"></canvas>
-    <canvas id="chartPosition"></canvas>
-    <canvas id="chartSF"></canvas>
-  </div>
-
-  <section id="historySection" style="display:none;">
-    <h2>Competition History</h2>
-    <table id="historyTable">
-      <thead>
-        <tr><th>Date</th><th>Competition</th><th>Score</th><th>Stableford</th><th>Points</th><th>Winnings</th><th>Trophy</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <div id="noData" class="no-data" style="display:none;">No data found for this player.</div>
+  <div id="noData" style="display:none;">No data found for this player.</div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const params = new URLSearchParams(window.location.search);
       const playerName = decodeURIComponent(params.get('name') || '');
-
       const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv';
 
-      // Fetch data from Google Sheets
       fetch(sheetUrl)
         .then(res => res.text())
         .then(csv => {
-          console.log('CSV Data Fetched:', csv); // Debugging the raw CSV
-
           const parsedData = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
-          console.log('Parsed Data:', parsedData); // Debugging the parsed data
+          console.log('Fetched CSV Data:', parsedData); // Debugging the parsed data
 
-          // Filter records for player (case-insensitive)
           const recs = parsedData.filter(r => r.Name && r.Name.toLowerCase() === playerName.toLowerCase());
-
           if (!recs.length) {
             document.getElementById('noData').style.display = 'block';
             return;
           }
 
-          document.getElementById('charts').style.display = '';
-          document.getElementById('historySection').style.display = '';
-
-          // Compute stats
           const games = recs.length;
           const totalPoints = recs.reduce((sum, r) => sum + (parseFloat(r.Points) || 0), 0);
           const totalWinnings = recs.reduce((sum, r) => sum + (parseFloat(r.Winnings) || 0), 0);
           const trophies = recs.filter(r => parseInt(r.Position) === 1).length;
-          const winPct = games ? ((trophies / games) * 100).toFixed(1) : 0;
 
-          // Render header with profile stats
           document.getElementById('profileHeader').innerHTML = `
-            <img class="avatar" src="default.png" alt="${playerName}" />
-            <h1>${playerName}</h1>
-            <ul class="stats">
+            <h2>${playerName}</h2>
+            <ul>
               <li>Games: ${games}</li>
               <li>Total Points: ${totalPoints}</li>
-              <li>Win %: ${winPct}%</li>
               <li>Trophies: ${trophies}</li>
               <li>Winnings: £${totalWinnings.toFixed(2)}</li>
             </ul>
           `;
-
-          // Prepare chart data
-          const competitions = recs.map(r => r.Title || r.Competition);
-          const dates = recs.map(r => parseDateStr(r.Date).toLocaleDateString());
-          const scores = recs.map(r => parseFloat(r.Score) || 0);
-          const positions = recs.map(r => parseInt(r.Position) || 0);
-          const sfs = recs.map(r => parseInt(r['Stableford Points']) || 0);
-
-          // Filter out Stroke Play competitions for Net Score chart
-          const strokePlayRecs = recs.filter(r => r.Type && r.Type.toLowerCase() === 'stroke play');
-          const netScores = strokePlayRecs.map(r => parseFloat(r.Score) || 0); // Net scores only from Stroke Play
-          const strokePlayCompetitions = strokePlayRecs.map(r => r.Title || r.Competition);
-
-          console.log('Filtered Stroke Play Records:', strokePlayRecs); // Debugging filtered records
-
-          // Stableford scores chart
-          const stablefordScores = sfs.filter(sf => sf > 0);
-          const stablefordCompetitions = competitions.filter((competition, index) => sfs[index] > 0); // Only include Stableford competitions
-
-          // Net Score Chart with Par 64 baseline (only for Net Score competitions)
-          const ctxScore = document.getElementById('chartScore').getContext('2d');
-          new Chart(ctxScore, {
-            type: 'line',
-            data: {
-              labels: strokePlayCompetitions,
-              datasets: [
-                { label: 'Net Score', data: netScores, fill: false },
-                { label: 'Par 64', data: new Array(strokePlayCompetitions.length).fill(64), borderDash: [5,5], fill: false }
-              ]
-            },
-            options: { responsive: true }
-          });
-
-          // Populate history table
-          const tbody = document.querySelector('#historyTable tbody');
-          recs.sort((a, b) => parseDateStr(b.Date) - parseDateStr(a.Date)).forEach(r => {
-            const trophy = parseInt(r.Position) === 1 ? '🏆' : '';
-            const win = isNaN(parseFloat(r.Winnings)) ? 0 : parseFloat(r.Winnings);
-            const sf = isNaN(parseInt(r['Stableford Points'])) ? 0 : parseInt(r['Stableford Points']);
-
-            const isStableford = sf > 0;
-            const score = isStableford ? '' : r.Score;
-            const stablefordPoints = isStableford ? sf : '';
-
-            tbody.innerHTML += `
-              <tr>
-                <td>${parseDateStr(r.Date).toLocaleDateString()}</td>
-                <td>${r.Title || r.Competition}</td>
-                <td>${score}</td>
-                <td>${stablefordPoints}</td>
-                <td>${r.Points || ''}</td>
-                <td>£${win.toFixed(2)}</td>
-                <td>${trophy}</td>
-              </tr>
-            `;
-          });
         })
         .catch(err => console.error('Error loading profile data:', err));
     });
   </script>
 </body>
-</html>
-<center>Player Profile Build v0.0.9 Net Score Filter | Pulling from Google Sheets</center>
-<br>
-<center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </html>
