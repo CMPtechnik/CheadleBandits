@@ -9,8 +9,8 @@
   <meta name="theme-color" content="#005c41" />
   <!-- Ensure PapaParse is loaded first -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.3.0/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root { --primary: #15171f; --accent: #e6f2ef; --text: #1e1e1e; --bg: #fdfdfd; --border: #ccc; }
     body { margin:0; font-family:'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
@@ -69,14 +69,16 @@
 
       const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rhIgmlvXGcinXjdJoAj0XxOuafX1POLtNBHnjFPUqDbvLqLpi4bvg9JwArglpspH50WnwU0lWhma/pub?output=csv';
 
+      // Fetch data from Google Sheets
       fetch(sheetUrl)
         .then(res => res.text())
         .then(csv => {
+          console.log('CSV Data Fetched:', csv); // Debugging the raw CSV
+
           const parsedData = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+          console.log('Parsed Data:', parsedData); // Debugging the parsed data
 
-          // Debugging the data
-          console.log('Fetched CSV Data:', parsedData);
-
+          // Filter records for player (case-insensitive)
           const recs = parsedData.filter(r => r.Name && r.Name.toLowerCase() === playerName.toLowerCase());
 
           if (!recs.length) {
@@ -119,8 +121,7 @@
           const netScores = strokePlayRecs.map(r => parseFloat(r.Score) || 0); // Net scores only from Stroke Play
           const strokePlayCompetitions = strokePlayRecs.map(r => r.Title || r.Competition);
 
-          // Debugging the filtered Stroke Play records
-          console.log('Filtered Stroke Play Records:', strokePlayRecs);
+          console.log('Filtered Stroke Play Records:', strokePlayRecs); // Debugging filtered records
 
           // Stableford scores chart
           const stablefordScores = sfs.filter(sf => sf > 0);
@@ -141,30 +142,28 @@
           });
 
           // Populate history table
-        const tbody = document.querySelector('#historyTable tbody');
-        recs.sort((a, b) => parseDateStr(b.Date) - parseDateStr(a.Date)).forEach(r => {
-          const trophy = parseInt(r.Position) === 1 ? '🏆' : '';
-          const win = isNaN(parseFloat(r.Winnings)) ? 0 : parseFloat(r.Winnings);
-          const sf = isNaN(parseInt(r['Stableford Points'])) ? 0 : parseInt(r['Stableford Points']);
+          const tbody = document.querySelector('#historyTable tbody');
+          recs.sort((a, b) => parseDateStr(b.Date) - parseDateStr(a.Date)).forEach(r => {
+            const trophy = parseInt(r.Position) === 1 ? '🏆' : '';
+            const win = isNaN(parseFloat(r.Winnings)) ? 0 : parseFloat(r.Winnings);
+            const sf = isNaN(parseInt(r['Stableford Points'])) ? 0 : parseInt(r['Stableford Points']);
 
-          // Check if the competition is Stableford or Net Score
-          const isStableford = sf > 0; // If Stableford Points > 0, it's a Stableford competition
-          const score = isStableford ? '' : r.Score;  // Only show Net Score for non-Stableford competitions
-          const stablefordPoints = isStableford ? sf : '';  // Show Stableford Points for Stableford competitions, otherwise empty
+            const isStableford = sf > 0;
+            const score = isStableford ? '' : r.Score;
+            const stablefordPoints = isStableford ? sf : '';
 
-          // Populate the table row
-          tbody.innerHTML += `
-            <tr>
-              <td>${parseDateStr(r.Date).toLocaleDateString()}</td>
-              <td>${r.Title || r.Competition}</td>
-              <td>${score}</td>  <!-- Show Net Score or empty for Stableford -->
-              <td>${stablefordPoints}</td>  <!-- Show Stableford Points or empty for Net Score -->
-              <td>${r.Points || ''}</td>
-              <td>£${win.toFixed(2)}</td>
-              <td>${trophy}</td>
-            </tr>
-          `;
-        });
+            tbody.innerHTML += `
+              <tr>
+                <td>${parseDateStr(r.Date).toLocaleDateString()}</td>
+                <td>${r.Title || r.Competition}</td>
+                <td>${score}</td>
+                <td>${stablefordPoints}</td>
+                <td>${r.Points || ''}</td>
+                <td>£${win.toFixed(2)}</td>
+                <td>${trophy}</td>
+              </tr>
+            `;
+          });
         })
         .catch(err => console.error('Error loading profile data:', err));
     });
