@@ -245,7 +245,7 @@
         totalWinnings[Name] = (totalWinnings[Name] || 0) + (parseFloat(Winnings) || 0);
       });
 
-      // Now count the trophies (all 1st place finishes)
+      // Count the number of trophies (1st place finishes)
       const players = Object.keys(netScores).map(name => {
         const games = netScores[name].length;
         const wins = history.filter(entry => entry.Name === name && parseInt(entry.Position) === 1).length;
@@ -312,7 +312,7 @@
     }
   </script>
 
-  <center>Build v1.0.0 | New Layout</center>
+  <center>Build v1.0.3 | Old logic for trophy count new tool tip logic</center>
   <br>
   <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
