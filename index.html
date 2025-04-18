@@ -245,15 +245,10 @@
         totalWinnings[Name] = (totalWinnings[Name] || 0) + (parseFloat(Winnings) || 0);
       });
 
-      Object.values(rounds).forEach(players =>
-        players.filter(p => p.position === 1).forEach(p =>
-          netWins[p.name] = (netWins[p.name] || 0) + 1
-        )
-      );
-
+      // Now count the trophies (all 1st place finishes)
       const players = Object.keys(netScores).map(name => {
         const games = netScores[name].length;
-        const wins = netWins[name] || 0;
+        const wins = history.filter(entry => entry.Name === name && parseInt(entry.Position) === 1).length;
         const winPct = ((wins / games) * 100).toFixed(1);
         return { name, games, winPct, points: totalPoints[name], winnings: totalWinnings[name], trophies: wins, competitions: getCompetitions(name) };
       }).sort((a, b) => {
@@ -317,7 +312,7 @@
     }
   </script>
 
-  <center>Build v1.0.1 | Tool Tips and Trophy(s)</center>
+  <center>Build v1.0.0 | New Layout</center>
   <br>
   <center><a href="https://www.theapplegeek.co.uk" target="_blank">The Apple Geek Data Solutions</a></center>
 </body>
