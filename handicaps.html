@@ -6,6 +6,7 @@
   <title>Handicap History</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -36,10 +37,18 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      min-height: 400px;
+    }
+    #loading {
+      text-align: center;
+      font-size: 1.2em;
+      padding: 50px;
+      color: #777;
     }
     canvas {
       width: 100% !important;
       height: auto !important;
+      display: none;
     }
   </style>
 </head>
@@ -49,32 +58,45 @@
 <h1>Player Handicap History</h1>
 
 <div id="chart-container">
+  <div id="loading">Loading chart...</div>
   <canvas id="handicapChart"></canvas>
 </div>
 
 <script>
-  const excelFileUrl = 'YOUR_XLSX_FILE_URL_HERE'; // <-- CHANGE THIS to your actual .xlsx URL
+  const excelFileUrl = "https://raw.githubusercontent.com/cmptechnik/CheadleBandits/main/data/leaguedata.xlsx";
+
+  function excelDateToJSDate(serial) {
+    const utc_days = Math.floor(serial - 25569);
+    const utc_value = utc_days * 86400;
+    const date_info = new Date(utc_value * 1000);
+    return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate());
+  }
 
   async function fetchAndProcessData() {
     const response = await fetch(excelFileUrl);
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
-    const sheetName = 'HandicapHistory'; // <-- your sheet name
+    const sheetName = 'HandicapHistory';
     const sheet = workbook.Sheets[sheetName];
     const data = XLSX.utils.sheet_to_json(sheet);
 
-    // Group data by player
     const players = {};
     data.forEach(row => {
       const player = row['Player'];
-      const date = new Date(row['Date']);
+      let date;
+
+      if (typeof row['Date'] === 'number') {
+        date = excelDateToJSDate(row['Date']);
+      } else {
+        date = new Date(row['Date']);
+      }
+
       const handicap = parseFloat(row['Handicap']);
       if (!players[player]) players[player] = [];
-      players[player].push({ date, handicap });
+      players[player].push({ date, handicap }); // Store handicap normally (positive)
     });
 
-    // Sort each player's history by date
     for (let player in players) {
       players[player].sort((a, b) => a.date - b.date);
     }
@@ -105,10 +127,11 @@
       data: players[player].map(p => ({ x: p.date, y: p.handicap })),
       borderColor: colors[index],
       backgroundColor: colors[index],
-      tension: 0.3,
+      tension: 0,  // Straight lines
       pointRadius: 4,
       pointHoverRadius: 6,
       fill: false,
+      spanGaps: false,
     }));
 
     new Chart(ctx, {
@@ -123,7 +146,7 @@
           x: {
             type: 'time',
             time: {
-              tooltipFormat: 'MMM dd, yyyy',
+              tooltipFormat: 'MMM yyyy',
               unit: 'month'
             },
             title: {
@@ -132,7 +155,8 @@
             }
           },
           y: {
-            reverse: true, // <-- This flips the vertical axis (lower = cooler)
+            min: 30, // 👈 Max expected handicap at the top
+            max: 0,  // 👈 0 at bottom (lower is better)
             title: {
               display: true,
               text: 'Handicap'
@@ -146,8 +170,13 @@
           tooltip: {
             callbacks: {
               label: function(context) {
-                const date = new Date(context.parsed.x).toLocaleDateString();
-                return `${context.dataset.label}: ${context.parsed.y} on ${date}`;
+                const rawDate = context.parsed.x;
+                const formattedDate = new Date(rawDate).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric'
+                });
+                return `${context.dataset.label}: ${context.parsed.y} on ${formattedDate}`;
               }
             }
           },
@@ -156,7 +185,14 @@
             position: 'bottom',
           }
         }
-      }
+      },
+      plugins: [{
+        id: 'customLoader',
+        afterRender: () => {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('handicapChart').style.display = 'block';
+        }
+      }]
     });
   }
 
