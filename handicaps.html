@@ -94,7 +94,7 @@
 
       const handicap = parseFloat(row['Handicap']);
       if (!players[player]) players[player] = [];
-      players[player].push({ date, handicap }); // Store handicap normally (positive)
+      players[player].push({ date, handicap }); // Store handicap normally
     });
 
     for (let player in players) {
@@ -127,7 +127,7 @@
       data: players[player].map(p => ({ x: p.date, y: p.handicap })),
       borderColor: colors[index],
       backgroundColor: colors[index],
-      tension: 0,  // Straight lines
+      tension: 0,  // Straight lines (no curves)
       pointRadius: 4,
       pointHoverRadius: 6,
       fill: false,
@@ -152,17 +152,26 @@
             title: {
               display: true,
               text: 'Date'
+            },
+            grid: {
+              drawOnChartArea: true,
+              color: "rgba(0,0,0,0.05)", // soft vertical lines
+              lineWidth: 1
             }
           },
           y: {
-            min: 30, // 👈 Max expected handicap at the top
-            max: 0,  // 👈 0 at bottom (lower is better)
             title: {
               display: true,
               text: 'Handicap'
             },
             ticks: {
+              stepSize: 1,
               precision: 1
+            },
+            grid: {
+              drawOnChartArea: true,
+              color: "rgba(0,0,0,0.1)", // nice visible horizontal lines
+              lineWidth: 1
             }
           }
         },
@@ -198,6 +207,5 @@
 
   createChart();
 </script>
-
 </body>
 </html>
