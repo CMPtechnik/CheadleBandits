@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Club Distances</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f4f4f4;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    select {
+      font-size: 1.2rem;
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .display-box {
+      background: white;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+      background: white;
+    }
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    input[type="text"], input[type="number"] {
+      width: 90%;
+      padding: 0.3rem;
+    }
+    button {
+      padding: 0.4rem 0.8rem;
+      margin: 0.3rem;
+      cursor: pointer;
+    }
+    .center {
+      text-align: center;
+    }
+    #editorSection {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>My Club Distances</h1>
+
+  <div class="center">
+    <button onclick="toggleEditor()">✏️ Master Edit Mode</button><button><a href="dyb.html">Yardage Book</a></button>
+  </div>
+
+  <select id="clubSelector" onchange="updateDisplay()">
+    <option value="">Select a club to view</option>
+  </select>
+
+  <div class="display-box" id="clubDisplay">
+    Select a club to view carry and total distance.
+  </div>
+  <br>
+<button><a href="dyb.html">Yardage Book</a></button>
+  <div id="editorSection">
+    <table>
+      <thead>
+        <tr>
+          <th>Club</th>
+          <th>Total (yds)</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="center">
+      <button onclick="addRow()">+ Add Club</button>
+      <button onclick="saveData()">💾 Save</button>
+      <button onclick="clearData()">🗑 Clear All</button>
+    </div>
+  </div>
+
+  <script>
+    let editMode = false;
+
+    function toggleEditor() {
+      editMode = !editMode;
+      document.getElementById('editorSection').style.display = editMode ? 'block' : 'none';
+    }
+
+    function addRow(club = '', carry = '', total = '') {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><span>${club}</span><input type="text" value="${club}" style="display:none;" /></td>
+        <td><span>${carry}</span><input type="number" value="${carry}" style="display:none;" /></td>
+        <td><span>${total}</span><input type="number" value="${total}" style="display:none;" /></td>
+        <td>
+          <button onclick="toggleEdit(this)">✏️ Edit</button>
+          <button onclick="deleteRow(this)">❌ Delete</button>
+        </td>
+      `;
+      document.getElementById('tableBody').appendChild(row);
+      updateSelector();
+    }
+
+    function toggleEdit(button) {
+      const row = button.closest('tr');
+      const spans = row.querySelectorAll('span');
+      const inputs = row.querySelectorAll('input');
+      const isEditing = inputs[0].style.display === 'inline-block';
+
+      spans.forEach(span => span.style.display = isEditing ? 'inline' : 'none');
+      inputs.forEach(input => input.style.display = isEditing ? 'none' : 'inline-block');
+
+      button.textContent = isEditing ? '✏️ Edit' : '💾 Save';
+
+      if (isEditing) saveData();  // Save on exit edit
+    }
+
+    function deleteRow(button) {
+      button.closest('tr').remove();
+      saveData();
+    }
+
+    function saveData() {
+      const rows = document.querySelectorAll('#tableBody tr');
+      const data = Array.from(rows).map(row => {
+        const inputs = row.querySelectorAll('input');
+        const spans = row.querySelectorAll('span');
+        spans.forEach((span, i) => span.textContent = inputs[i].value); // update view
+        return {
+          club: inputs[0].value,
+          carry: inputs[1].value,
+          total: inputs[2].value
+        };
+      });
+      localStorage.setItem('clubData', JSON.stringify(data));
+      updateSelector();
+      updateDisplay();
+    }
+
+    function loadData() {
+      const data = JSON.parse(localStorage.getItem('clubData') || '[]');
+      data.forEach(entry => addRow(entry.club, entry.carry, entry.total));
+    }
+
+    function clearData() {
+      if (confirm('Clear all saved club distances?')) {
+        localStorage.removeItem('clubData');
+        document.getElementById('tableBody').innerHTML = '';
+        updateSelector();
+        updateDisplay();
+      }
+    }
+
+    function updateSelector() {
+      const selector = document.getElementById('clubSelector');
+      selector.innerHTML = '<option value="">Select a club to view</option>';
+      const rows = document.querySelectorAll('#tableBody tr');
+      rows.forEach((row, index) => {
+        const club = row.querySelectorAll('input')[0].value;
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = club;
+        selector.appendChild(option);
+      });
+    }
+
+    function updateDisplay() {
+      const selector = document.getElementById('clubSelector');
+      const index = selector.value;
+      const display = document.getElementById('clubDisplay');
+      if (index === '') {
+        display.textContent = 'Select a club to view carry and total distance.';
+        return;
+      }
+      const row = document.querySelectorAll('#tableBody tr')[index];
+      const inputs = row.querySelectorAll('input');
+      const club = inputs[0].value;
+      const carry = inputs[1].value;
+      const total = inputs[2].value;
+      display.innerHTML = `<strong>${club}</strong><br>Carry: <strong>${carry} yds</strong><br>Total: <strong>${total} yds</strong>`;
+    }
+
+    window.onload = loadData;
+  </script>
+
+</body>
+</html>
